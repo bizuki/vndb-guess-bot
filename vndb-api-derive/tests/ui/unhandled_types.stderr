@@ -1,0 +1,17 @@
+error: #[derive(VndbFieldsEnum)] unsupported field type
+ --> tests/ui/unhandled_types.rs:5:10
+  |
+5 |     str: &'static str,
+  |          ^^^^^^^^^^^^
+
+error[E0433]: failed to resolve: use of undeclared type `StructFields`
+  --> tests/ui/unhandled_types.rs:10:13
+   |
+10 |     let _ = StructFields::Str;
+   |             ^^^^^^^^^^^^ use of undeclared type `StructFields`
+
+error[E0433]: failed to resolve: use of undeclared type `StructFields`
+  --> tests/ui/unhandled_types.rs:11:13
+   |
+11 |     let _ = StructFields::I32;
+   |             ^^^^^^^^^^^^ use of undeclared type `StructFields`

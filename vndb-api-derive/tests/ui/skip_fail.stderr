@@ -1,0 +1,44 @@
+error[E0599]: no variant or associated item named `Skipped` found for enum `StructFields` in the current scope
+  --> tests/ui/skip_fail.rs:24:27
+   |
+3  | #[derive(VndbFieldsEnum)]
+   |          -------------- variant or associated item `Skipped` not found for this enum
+...
+24 |     let _ = StructFields::Skipped;
+   |                           ^^^^^^^ variant or associated item not found in `StructFields`
+
+error[E0599]: no variant or associated item named `Nested` found for enum `NestedFields` in the current scope
+  --> tests/ui/skip_fail.rs:27:53
+   |
+10 | #[derive(VndbFieldsEnum)]
+   |          -------------- variant or associated item `Nested` not found for this enum
+...
+27 |     let _ = StructFields::Nested(vec![NestedFields::Nested(vec![NestedNestedFields::Test])]);
+   |                                                     ^^^^^^ variant or associated item not found in `NestedFields`
+
+error[E0599]: no variant or associated item named `Nested` found for enum `NestedFields` in the current scope
+  --> tests/ui/skip_fail.rs:29:75
+   |
+10 | #[derive(VndbFieldsEnum)]
+   |          -------------- variant or associated item `Nested` not found for this enum
+...
+29 |     let _ = StructFields::Nested(vec![NestedFields::FieldA, NestedFields::Nested(vec![NestedNestedFields::Test])]);
+   |                                                                           ^^^^^^ variant or associated item not found in `NestedFields`
+
+error[E0599]: no variant or associated item named `Nested` found for enum `NestedFields` in the current scope
+  --> tests/ui/skip_fail.rs:30:53
+   |
+10 | #[derive(VndbFieldsEnum)]
+   |          -------------- variant or associated item `Nested` not found for this enum
+...
+30 |     let _ = StructFields::Nested(vec![NestedFields::Nested(vec![NestedNestedFields::Test]), NestedFields::FieldB]);
+   |                                                     ^^^^^^ variant or associated item not found in `NestedFields`
+
+error[E0599]: no variant or associated item named `Nested` found for enum `NestedFields` in the current scope
+  --> tests/ui/skip_fail.rs:31:53
+   |
+10 | #[derive(VndbFieldsEnum)]
+   |          -------------- variant or associated item `Nested` not found for this enum
+...
+31 |     let _ = StructFields::Nested(vec![NestedFields::Nested(vec![NestedNestedFields::Test]), NestedFields::FieldB]);
+   |                                                     ^^^^^^ variant or associated item not found in `NestedFields`

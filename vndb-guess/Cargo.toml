@@ -1,0 +1,13 @@
+[package]
+name = "vndb-guess"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "vndb_guess"
+path = "src/lib.rs"
+
+
+[dependencies]
+vn = { "version" = "0.5.0", "features" = ["random"] }
+serde_json = "1"
