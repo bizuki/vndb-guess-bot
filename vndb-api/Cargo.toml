@@ -2,14 +2,30 @@
 name = "vndb-api"
 version = "0.1.0"
 edition = "2021"
+readme = "README.md"
 
 [lib]
 name = "vndb_api"
 path = "src/lib.rs"
 
 
+[features]
+default = ["reqwest-client", "rustls-tls", "mock-client"]
+reqwest-client = ["dep:reqwest", "reqwest/json"]
+rustls-tls = ["reqwest-client", "reqwest/rustls-tls"]
+native-tls = ["reqwest-client", "reqwest/native-tls"]
+http2 = ["reqwest-client", "reqwest/http2"]
+system-proxy = ["reqwest-client", "reqwest/system-proxy"]
+mock-client = []
+
 [dependencies]
-reqwest = { "version" = "0.12.23", "features" = ["json"] }
+reqwest = { version = "0.12.23", default-features = false, optional = true }
 serde_json = "1"
-serde = "1"
+serde = { version = "1", features = ["derive"] }
+thiserror = "1"
 vndb-api-derive = { path = "../vndb-api-derive" }
+vndb-api-macros-support = { path = "../vndb-api-macros-support" }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt"] }
+trybuild = "1.0"

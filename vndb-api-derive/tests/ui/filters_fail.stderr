@@ -1,0 +1,23 @@
+error: #[derive(VndbFiltersEnum)] can only be used on user-defined filter enums
+ --> tests/ui/filters_fail.rs:6:12
+  |
+6 | pub struct Struct {
+  |            ^^^^^^
+
+error: leaf filter variants must specify `value = TypePath`
+  --> tests/ui/filters_fail.rs:13:5
+   |
+13 |     #[vndb_filter]
+   |     ^
+
+error: nested or flattened filter variants must carry one child filter enum
+  --> tests/ui/filters_fail.rs:19:5
+   |
+19 |     #[vndb_filter(nested)]
+   |     ^
+
+error: filter variants with payloads must be marked nested or flatten
+  --> tests/ui/filters_fail.rs:25:5
+   |
+25 |     #[vndb_filter(value = vndb_api_macros_support::filter::StringValue)]
+   |     ^

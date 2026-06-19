@@ -1,0 +1,169 @@
+error: unknown VNDB filter field for ProducerFilters
+  --> tests/ui/filter_macro_fail.rs:31:13
+   |
+31 |     let _ = ProducerFilters!(description);
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the macro `ProducerFilters` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: unknown VNDB filter field for TestCharacterFilters
+  --> tests/ui/filter_macro_fail.rs:3:24
+   |
+3  | #[derive(Debug, Clone, VndbFiltersEnum)]
+   |                        ^^^^^^^^^^^^^^^
+...
+30 |     let _ = TestCharacterFilters!(missing);
+   |             ------------------------------ in this macro invocation
+   |
+   = note: this error originates in the macro `TestCharacterFilters` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: unknown VNDB filter field for TestCharacterFilters
+  --> tests/ui/filter_macro_fail.rs:3:24
+   |
+3  | #[derive(Debug, Clone, VndbFiltersEnum)]
+   |                        ^^^^^^^^^^^^^^^
+...
+29 |     let _ = TestCharacterFilters!("name");
+   |             ----------------------------- in this macro invocation
+   |
+   = note: this error originates in the macro `TestCharacterFilters` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: unknown VNDB filter field for TestCharacterFilters
+  --> tests/ui/filter_macro_fail.rs:3:24
+   |
+3  | #[derive(Debug, Clone, VndbFiltersEnum)]
+   |                        ^^^^^^^^^^^^^^^
+...
+28 |     let _ = TestCharacterFilters!(name = "x");
+   |             --------------------------------- in this macro invocation
+   |
+   = note: this error originates in the macro `TestCharacterFilters` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the trait bound `&str: IntoVndbFilterValue<IntegerValue>` is not satisfied
+  --> tests/ui/filter_macro_fail.rs:32:43
+   |
+32 |     let _ = TestCharacterFilters!(age).eq("old");
+   |                                        -- ^^^^^ the trait `IntoVndbFilterValue<IntegerValue>` is not implemented for `&str`
+   |                                        |
+   |                                        required by a bound introduced by this call
+   |
+   = help: the trait `IntoVndbFilterValue<IntegerValue>` is not implemented for `&str`
+           but trait `IntoVndbFilterValue<StringValue>` is implemented for it
+   = help: for that trait implementation, expected `StringValue`, found `IntegerValue`
+note: required by a bound in `FilterField::<F, V, Ops, Nullability>::eq`
+  --> $WORKSPACE/vndb-api-macros-support/src/filter/field.rs
+   |
+   |     pub fn eq<T>(self, value: T) -> VndbFilter<F>
+   |            -- required by a bound in this associated function
+   |     where
+   |         T: IntoVndbFilterValue<V>,
+   |            ^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `FilterField::<F, V, Ops, Nullability>::eq`
+
+error[E0599]: the method `gt` exists for struct `FilterField<TestCharacterFilters, StringValue, EqualityOps, NonNullable>`, but its trait bounds were not satisfied
+  --> tests/ui/filter_macro_fail.rs:33:41
+   |
+33 |     let _ = TestCharacterFilters!(name).gt("x");
+   |                                         ^^ method cannot be called due to unsatisfied trait bounds
+   |
+  ::: $WORKSPACE/vndb-api-macros-support/src/filter/field.rs
+   |
+   | pub struct EqualityOps;
+   | ---------------------- doesn't satisfy `EqualityOps: SupportsOrdering`
+...
+   | pub struct FilterField<F, V, Ops, Nullability>
+   | ---------------------------------------------- doesn't satisfy `_: Iterator`
+   |
+   = note: the following trait bounds were not satisfied:
+           `EqualityOps: SupportsOrdering`
+           `FilterField<TestCharacterFilters, StringValue, EqualityOps, NonNullable>: Iterator`
+           which is required by `&mut FilterField<TestCharacterFilters, StringValue, EqualityOps, NonNullable>: Iterator`
+
+error[E0599]: no method named `is_null` found for struct `FilterField<TestCharacterFilters, StringValue, EqualityOps, NonNullable>` in the current scope
+  --> tests/ui/filter_macro_fail.rs:34:41
+   |
+34 |     let _ = TestCharacterFilters!(name).is_null();
+   |                                         ^^^^^^^ method not found in `FilterField<TestCharacterFilters, StringValue, EqualityOps, NonNullable>`
+   |
+   = note: the method was found for
+           - `FilterField<F, V, Ops, Nullable>`
+
+error[E0277]: the trait bound `[{integer}; 2]: IntoVndbFilterValue<vndb_api::filter::Birthday>` is not satisfied
+  --> tests/ui/filter_macro_fail.rs:35:48
+   |
+35 |     let _ = TestCharacterFilters!(birthday).eq([1, 23]);
+   |                                             -- ^^^^^^^ the trait `IntoVndbFilterValue<vndb_api::filter::Birthday>` is not implemented for `[{integer}; 2]`
+   |                                             |
+   |                                             required by a bound introduced by this call
+   |
+   = help: the following other types implement trait `IntoVndbFilterValue<Kind>`:
+             `&CharacterId` implements `IntoVndbFilterValue<CharacterId>`
+             `&ProducerId` implements `IntoVndbFilterValue<ProducerId>`
+             `&QuoteId` implements `IntoVndbFilterValue<QuoteId>`
+             `&ReleaseId` implements `IntoVndbFilterValue<ReleaseId>`
+             `&StaffId` implements `IntoVndbFilterValue<StaffId>`
+             `&TagId` implements `IntoVndbFilterValue<TagId>`
+             `&TraitId` implements `IntoVndbFilterValue<TraitId>`
+             `&UserId` implements `IntoVndbFilterValue<UserId>`
+           and $N others
+note: required by a bound in `FilterField::<F, V, Ops, Nullability>::eq`
+  --> $WORKSPACE/vndb-api-macros-support/src/filter/field.rs
+   |
+   |     pub fn eq<T>(self, value: T) -> VndbFilter<F>
+   |            -- required by a bound in this associated function
+   |     where
+   |         T: IntoVndbFilterValue<V>,
+   |            ^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `FilterField::<F, V, Ops, Nullability>::eq`
+
+error[E0277]: the trait bound `[{integer}; 2]: IntoVndbFilterValue<vndb_api::filter::Resolution>` is not satisfied
+  --> tests/ui/filter_macro_fail.rs:36:48
+   |
+36 |     let _ = TestReleaseFilters!(resolution).eq([1920, 1080]);
+   |                                             -- ^^^^^^^^^^^^ the trait `IntoVndbFilterValue<vndb_api::filter::Resolution>` is not implemented for `[{integer}; 2]`
+   |                                             |
+   |                                             required by a bound introduced by this call
+   |
+   = help: the following other types implement trait `IntoVndbFilterValue<Kind>`:
+             `&CharacterId` implements `IntoVndbFilterValue<CharacterId>`
+             `&ProducerId` implements `IntoVndbFilterValue<ProducerId>`
+             `&QuoteId` implements `IntoVndbFilterValue<QuoteId>`
+             `&ReleaseId` implements `IntoVndbFilterValue<ReleaseId>`
+             `&StaffId` implements `IntoVndbFilterValue<StaffId>`
+             `&TagId` implements `IntoVndbFilterValue<TagId>`
+             `&TraitId` implements `IntoVndbFilterValue<TraitId>`
+             `&UserId` implements `IntoVndbFilterValue<UserId>`
+           and $N others
+note: required by a bound in `FilterField::<F, V, Ops, Nullability>::eq`
+  --> $WORKSPACE/vndb-api-macros-support/src/filter/field.rs
+   |
+   |     pub fn eq<T>(self, value: T) -> VndbFilter<F>
+   |            -- required by a bound in this associated function
+   |     where
+   |         T: IntoVndbFilterValue<V>,
+   |            ^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `FilterField::<F, V, Ops, Nullability>::eq`
+
+error[E0277]: the trait bound `Value: IntoVndbFilterValue<TagFilterValue>` is not satisfied
+  --> tests/ui/filter_macro_fail.rs:37:36
+   |
+37 |     let _ = TestVnFilters!(tag).eq(serde_json::json!("g505"));
+   |                                 -- ^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `IntoVndbFilterValue<TagFilterValue>` is not implemented for `Value`
+   |                                 |
+   |                                 required by a bound introduced by this call
+   |
+   = help: the following other types implement trait `IntoVndbFilterValue<Kind>`:
+             `&CharacterId` implements `IntoVndbFilterValue<CharacterId>`
+             `&ProducerId` implements `IntoVndbFilterValue<ProducerId>`
+             `&QuoteId` implements `IntoVndbFilterValue<QuoteId>`
+             `&ReleaseId` implements `IntoVndbFilterValue<ReleaseId>`
+             `&StaffId` implements `IntoVndbFilterValue<StaffId>`
+             `&TagId` implements `IntoVndbFilterValue<TagId>`
+             `&TraitId` implements `IntoVndbFilterValue<TraitId>`
+             `&UserId` implements `IntoVndbFilterValue<UserId>`
+           and $N others
+note: required by a bound in `FilterField::<F, V, Ops, Nullability>::eq`
+  --> $WORKSPACE/vndb-api-macros-support/src/filter/field.rs
+   |
+   |     pub fn eq<T>(self, value: T) -> VndbFilter<F>
+   |            -- required by a bound in this associated function
+   |     where
+   |         T: IntoVndbFilterValue<V>,
+   |            ^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `FilterField::<F, V, Ops, Nullability>::eq`

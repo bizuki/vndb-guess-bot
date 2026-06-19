@@ -4,4 +4,5 @@ resolver = "2"
 members = [
     "vndb-api",
     "vndb-api-derive",
+    "vndb-api-macros-support",
 ]

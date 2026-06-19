@@ -1,0 +1,76 @@
+error: unknown VNDB selector field for SortableSort
+  --> tests/ui/selectors_fail.rs:15:10
+   |
+15 | #[derive(VndbSortEnum)]
+   |          ^^^^^^^^^^^^
+...
+29 |     let _ = SortableSort!("id");
+   |             ------------------- in this macro invocation
+   |
+   = note: this error originates in the macro `__vndb_selector_macro_SortableSort_2` which comes from the expansion of the macro `SortableSort` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: unknown VNDB selector field for RootFields
+  --> tests/ui/selectors_fail.rs:3:10
+   |
+3  | #[derive(VndbFieldsEnum)]
+   |          ^^^^^^^^^^^^^^
+...
+28 |     let _ = RootFields!("title");
+   |             -------------------- in this macro invocation
+   |
+   = note: this error originates in the macro `__vndb_selector_macro_RootFields_0` which comes from the expansion of the macro `RootFields` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: unknown VNDB selector field for SortableSort
+  --> tests/ui/selectors_fail.rs:15:10
+   |
+15 | #[derive(VndbSortEnum)]
+   |          ^^^^^^^^^^^^
+...
+27 |     let _ = SortableSort!(id.leaf);
+   |             ---------------------- in this macro invocation
+   |
+   = note: this error originates in the macro `__vndb_selector_macro_SortableSort_2` which comes from the expansion of the macro `SortableSort` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: unknown VNDB selector field for RootFields
+  --> tests/ui/selectors_fail.rs:3:10
+   |
+3  | #[derive(VndbFieldsEnum)]
+   |          ^^^^^^^^^^^^^^
+...
+26 |     let _ = RootFields!(selector);
+   |             --------------------- in this macro invocation
+   |
+   = note: this error originates in the macro `__vndb_selector_macro_RootFields_0` which comes from the expansion of the macro `RootFields` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: trailing comma in selector
+  --> tests/ui/selectors_fail.rs:3:10
+   |
+3  | #[derive(VndbFieldsEnum)]
+   |          ^^^^^^^^^^^^^^
+...
+24 |     let _ = RootFields!(title,);
+   |             ------------------- in this macro invocation
+   |
+   = note: this error originates in the macro `__vndb_selector_macro_RootFields_0` which comes from the expansion of the macro `RootFields` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: unknown VNDB selector field for RootFields
+  --> tests/ui/selectors_fail.rs:3:10
+   |
+3  | #[derive(VndbFieldsEnum)]
+   |          ^^^^^^^^^^^^^^
+...
+23 |     let _ = RootFields!(child);
+   |             ------------------ in this macro invocation
+   |
+   = note: this error originates in the macro `__vndb_selector_macro_RootFields_0` which comes from the expansion of the macro `RootFields` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: unknown VNDB selector field for RootFields
+  --> tests/ui/selectors_fail.rs:3:10
+   |
+3  | #[derive(VndbFieldsEnum)]
+   |          ^^^^^^^^^^^^^^
+...
+22 |     let _ = RootFields!(missing);
+   |             -------------------- in this macro invocation
+   |
+   = note: this error originates in the macro `__vndb_selector_macro_RootFields_0` which comes from the expansion of the macro `RootFields` (in Nightly builds, run with -Z macro-backtrace for more info)

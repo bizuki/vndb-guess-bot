@@ -2,6 +2,7 @@ use vndb_api_derive::VndbFieldsEnum;
 
 #[derive(VndbFieldsEnum)]
 pub struct Struct {
+    #[vndb_field(nested)]
     nested: Nested,
     #[vndb_field(skip)]
     skipped: String
@@ -22,11 +23,7 @@ pub struct NestedNested {
 
 fn main() {
     let _ = StructFields::Skipped;
-    let _ = StructFields::Nested(vec![NestedFields::FieldA]);
-    let _ = StructFields::Nested(vec![NestedFields::FieldB]);
-    let _ = StructFields::Nested(vec![NestedFields::Nested(vec![NestedNestedFields::Test])]);
-    let _ = StructFields::Nested(vec![NestedFields::FieldA, NestedFields::FieldB]);
-    let _ = StructFields::Nested(vec![NestedFields::FieldA, NestedFields::Nested(vec![NestedNestedFields::Test])]);
-    let _ = StructFields::Nested(vec![NestedFields::Nested(vec![NestedNestedFields::Test]), NestedFields::FieldB]);
-    let _ = StructFields::Nested(vec![NestedFields::Nested(vec![NestedNestedFields::Test]), NestedFields::FieldB]);
+    let _ = StructFields::Nested(NestedFields::FieldA);
+    let _ = StructFields::Nested(NestedFields::FieldB);
+    let _ = StructFields::Nested(NestedFields::Nested(NestedNestedFields::Test));
 }

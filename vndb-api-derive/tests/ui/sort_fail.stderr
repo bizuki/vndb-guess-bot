@@ -1,0 +1,25 @@
+error[E0599]: no variant or associated item named `Title` found for enum `StructSort` in the current scope
+  --> tests/ui/sort_fail.rs:15:25
+   |
+3  | #[derive(VndbSortEnum)]
+   |          ------------ variant or associated item `Title` not found for this enum
+...
+15 |     let _ = StructSort::Title;
+   |                         ^^^^^ variant or associated item not found in `StructSort`
+
+error[E0433]: failed to resolve: use of undeclared type `NestedSort`
+  --> tests/ui/sort_fail.rs:16:32
+   |
+16 |     let _ = StructSort::Nested(NestedSort::FieldA);
+   |                                ^^^^^^^^^^ use of undeclared type `NestedSort`
+
+error[E0618]: expected function, found `StructSort`
+  --> tests/ui/sort_fail.rs:16:13
+   |
+9  |     nested: Nested,
+   |     ------ `StructSort::Nested` defined here
+...
+16 |     let _ = StructSort::Nested(NestedSort::FieldA);
+   |             ^^^^^^^^^^^^^^^^^^--------------------
+   |             |
+   |             call expression requires function

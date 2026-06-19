@@ -1,9 +1,12 @@
+pub mod auth;
 pub mod character;
 pub mod common;
 pub mod producer;
+pub mod quote;
 pub mod release;
 pub mod staff;
+pub mod stats;
 pub mod tag;
 pub mod traits;
+pub mod user;
 pub mod vn;
-pub mod quote;
