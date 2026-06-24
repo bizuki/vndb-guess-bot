@@ -1,4 +1,4 @@
-use proc_macro2::{Ident, TokenStream};
+use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote};
 use std::collections::BTreeMap;
 use syn::DeriveInput;
@@ -140,6 +140,7 @@ fn expand_enum(input: &DeriveInput, config: EnumConfig) -> syn::Result<TokenStre
     });
 
     let flattened_from_impls = flattened_from_impls(&enum_ident, &selections);
+    let field_helpers = field_helpers(&enum_ident, &selections, config);
     let path_helpers = path::helpers(
         &enum_ident,
         &input.vis,
@@ -186,6 +187,8 @@ fn expand_enum(input: &DeriveInput, config: EnumConfig) -> syn::Result<TokenStre
         }
 
         #( #flattened_from_impls )*
+
+        #field_helpers
 
         #path_helpers
     })
@@ -242,4 +245,156 @@ pub(crate) fn flattened_from_impls(
             })
         })
         .collect()
+}
+
+fn field_helpers(
+    enum_ident: &Ident,
+    selections: &[selection::Selection],
+    config: EnumConfig,
+) -> TokenStream {
+    if config.derive_name != "VndbFieldsEnum" {
+        return quote! {};
+    }
+
+    let constructors = selections.iter().map(field_constructor);
+    let all_non_recursive_arms = selections.iter().map(field_all_non_recursive_arm);
+    let enum_name = enum_ident.to_string();
+
+    quote! {
+        impl #enum_ident {
+            #( #constructors )*
+
+            pub fn all() -> ::std::vec::Vec<Self> {
+                Self::__vndb_all_non_recursive(&mut ::std::vec::Vec::new())
+            }
+
+            #[doc(hidden)]
+            pub fn __vndb_all_non_recursive(active: &mut ::std::vec::Vec<&'static str>) -> ::std::vec::Vec<Self> {
+                if active.contains(&#enum_name) {
+                    return ::std::vec::Vec::new();
+                }
+
+                active.push(#enum_name);
+
+                let mut items = ::std::vec::Vec::new();
+                #( #all_non_recursive_arms )*
+
+                active.pop();
+                items
+            }
+        }
+    }
+}
+
+fn field_constructor(selection: &selection::Selection) -> TokenStream {
+    let variant_ident = &selection.variant_ident;
+    let method_ident = field_method_ident(&selection.path, variant_ident.span());
+
+    match &selection.nested_enum_ident {
+        Some(nested_enum_ident) => {
+            let wrap_item = wrapped_nested_item(selection);
+
+            quote! {
+                pub fn #method_ident(item: #nested_enum_ident) -> Self {
+                    Self::#variant_ident(#wrap_item)
+                }
+            }
+        }
+        None => quote! {
+            pub fn #method_ident() -> Self {
+                Self::#variant_ident
+            }
+        },
+    }
+}
+
+fn field_all_non_recursive_arm(selection: &selection::Selection) -> TokenStream {
+    let variant_ident = &selection.variant_ident;
+
+    match &selection.nested_enum_ident {
+        Some(nested_enum_ident) => {
+            let wrap_item = wrapped_nested_item(selection);
+
+            quote! {
+                for item in #nested_enum_ident::__vndb_all_non_recursive(active) {
+                    items.push(Self::#variant_ident(#wrap_item));
+                }
+            }
+        }
+        None => quote! {
+            items.push(Self::#variant_ident);
+        },
+    }
+}
+
+fn wrapped_nested_item(selection: &selection::Selection) -> TokenStream {
+    if selection.nested_boxed {
+        quote! { ::std::boxed::Box::new(item) }
+    } else {
+        quote! { item }
+    }
+}
+
+fn field_method_ident(path: &str, span: Span) -> Ident {
+    if is_rust_keyword(path) {
+        Ident::new_raw(path, span)
+    } else {
+        Ident::new(path, span)
+    }
+}
+
+fn is_rust_keyword(ident: &str) -> bool {
+    matches!(
+        ident,
+        "as" | "async"
+            | "await"
+            | "break"
+            | "const"
+            | "continue"
+            | "crate"
+            | "dyn"
+            | "else"
+            | "enum"
+            | "extern"
+            | "false"
+            | "fn"
+            | "for"
+            | "if"
+            | "impl"
+            | "in"
+            | "let"
+            | "loop"
+            | "match"
+            | "mod"
+            | "move"
+            | "mut"
+            | "pub"
+            | "ref"
+            | "return"
+            | "self"
+            | "Self"
+            | "static"
+            | "struct"
+            | "super"
+            | "trait"
+            | "true"
+            | "type"
+            | "unsafe"
+            | "use"
+            | "where"
+            | "while"
+            | "abstract"
+            | "become"
+            | "box"
+            | "do"
+            | "final"
+            | "macro"
+            | "override"
+            | "priv"
+            | "try"
+            | "typeof"
+            | "unsized"
+            | "virtual"
+            | "yield"
+    )
 }

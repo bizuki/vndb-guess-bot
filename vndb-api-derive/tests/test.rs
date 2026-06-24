@@ -172,6 +172,48 @@ fn field_selector_macro_keeps_ungrouped_nested_paths_separate() {
 }
 
 #[test]
+fn field_helpers_build_variants_and_all_fields() {
+    assert_eq!(SimpleFields::id().to_string(), "id");
+    assert_eq!(SimpleFields::field().to_string(), "field");
+
+    assert_eq!(
+        NestedFields::field_a(SimpleFields::field()).to_string(),
+        "field_a{field}"
+    );
+    assert_eq!(
+        NestedFields::field_b(NestedFields::field_a(SimpleFields::id())).to_string(),
+        "field_b{field_a{id}}"
+    );
+
+    let fields = SimpleFields::all()
+        .iter()
+        .map(ToString::to_string)
+        .collect::<Vec<_>>();
+    assert_eq!(fields, vec!["id", "field"]);
+
+    let fields = FlattenedFields::all()
+        .iter()
+        .map(ToString::to_string)
+        .collect::<Vec<_>>();
+    assert_eq!(fields, vec!["id", "field", "nested{id}", "nested{field}"]);
+
+    let fields = ExplicitBoxedFields::all()
+        .iter()
+        .map(ToString::to_string)
+        .collect::<Vec<_>>();
+    assert_eq!(fields, vec!["nested{id}", "nested{field}", "id", "field"]);
+}
+
+#[test]
+fn field_all_helpers_skip_recursive_cycles() {
+    let fields = NestedFields::all()
+        .iter()
+        .map(ToString::to_string)
+        .collect::<Vec<_>>();
+    assert_eq!(fields, vec!["field_a{id}", "field_a{field}"]);
+}
+
+#[test]
 fn flatten_fields() {
     assert_eq!(
         FlattenedFields::Simple(SimpleFields::Field).to_string(),

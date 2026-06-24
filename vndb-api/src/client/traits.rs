@@ -1,7 +1,19 @@
+use serde::{de::DeserializeOwned, Serialize};
+
 use crate::{
+    client::{EndpointQueryBuilder, VndbEndpoint},
     models::auth::AuthInfo,
+    models::character::{Character, CharacterFields, CharacterFilters, CharacterSort},
+    models::producer::{Producer, ProducerFields, ProducerFilters, ProducerSort},
+    models::quote::{Quote, QuoteFields, QuoteFilters, QuoteSort},
+    models::release::{Release, ReleaseFields, ReleaseFilters, ReleaseSort},
+    models::staff::{Staff, StaffFields, StaffFilters, StaffSort},
     models::stats::VndbStats,
+    models::tag::{Tag, TagFields, TagFilters, TagSort},
+    models::traits::{Trait, TraitFields, TraitFilters, TraitSort},
     models::user::{UserLookupQuery, UserLookupResponse},
+    models::vn::{Vn, VnFields, VnFilters, VnSort},
+    query::{VndbQuery, VndbQueryResponse},
 };
 
 pub use crate::{
@@ -27,19 +39,74 @@ pub trait VndbClient {
 
     async fn authinfo(&self) -> Result<AuthInfo, Self::Error>;
 
-    async fn vn(&self, query: VnQuery) -> Result<VnResult, Self::Error>;
+    async fn execute_query<Model, Filter, Field, Sort>(
+        &self,
+        endpoint: VndbEndpoint,
+        query: VndbQuery<Filter, Field, Sort>,
+    ) -> Result<VndbQueryResponse<Model>, Self::Error>
+    where
+        Model: DeserializeOwned,
+        VndbQuery<Filter, Field, Sort>: Serialize;
 
-    async fn release(&self, query: ReleaseQuery) -> Result<ReleaseResult, Self::Error>;
+    fn vn(&self) -> EndpointQueryBuilder<'_, Self, Vn, VnFilters, VnFields, VnSort>
+    where
+        Self: Sized,
+    {
+        EndpointQueryBuilder::new(self, VndbEndpoint::Vn)
+    }
 
-    async fn producer(&self, query: ProducerQuery) -> Result<ProducerResult, Self::Error>;
+    fn release(
+        &self,
+    ) -> EndpointQueryBuilder<'_, Self, Release, ReleaseFilters, ReleaseFields, ReleaseSort>
+    where
+        Self: Sized,
+    {
+        EndpointQueryBuilder::new(self, VndbEndpoint::Release)
+    }
 
-    async fn character(&self, query: CharacterQuery) -> Result<CharacterResult, Self::Error>;
+    fn producer(
+        &self,
+    ) -> EndpointQueryBuilder<'_, Self, Producer, ProducerFilters, ProducerFields, ProducerSort>
+    where
+        Self: Sized,
+    {
+        EndpointQueryBuilder::new(self, VndbEndpoint::Producer)
+    }
 
-    async fn staff(&self, query: StaffQuery) -> Result<StaffResult, Self::Error>;
+    fn character(
+        &self,
+    ) -> EndpointQueryBuilder<'_, Self, Character, CharacterFilters, CharacterFields, CharacterSort>
+    where
+        Self: Sized,
+    {
+        EndpointQueryBuilder::new(self, VndbEndpoint::Character)
+    }
 
-    async fn tag(&self, query: TagQuery) -> Result<TagResult, Self::Error>;
+    fn staff(&self) -> EndpointQueryBuilder<'_, Self, Staff, StaffFilters, StaffFields, StaffSort>
+    where
+        Self: Sized,
+    {
+        EndpointQueryBuilder::new(self, VndbEndpoint::Staff)
+    }
 
-    async fn traits(&self, query: TraitQuery) -> Result<TraitResult, Self::Error>;
+    fn tag(&self) -> EndpointQueryBuilder<'_, Self, Tag, TagFilters, TagFields, TagSort>
+    where
+        Self: Sized,
+    {
+        EndpointQueryBuilder::new(self, VndbEndpoint::Tag)
+    }
 
-    async fn quote(&self, query: QuoteQuery) -> Result<QuoteResult, Self::Error>;
+    fn traits(&self) -> EndpointQueryBuilder<'_, Self, Trait, TraitFilters, TraitFields, TraitSort>
+    where
+        Self: Sized,
+    {
+        EndpointQueryBuilder::new(self, VndbEndpoint::Trait)
+    }
+
+    fn quote(&self) -> EndpointQueryBuilder<'_, Self, Quote, QuoteFilters, QuoteFields, QuoteSort>
+    where
+        Self: Sized,
+    {
+        EndpointQueryBuilder::new(self, VndbEndpoint::Quote)
+    }
 }

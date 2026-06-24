@@ -93,18 +93,20 @@ Use `ReqwestVndbClient` for the live API:
 
 ```rust
 use vndb_api::client::{ReqwestVndbClient, VndbClient};
-use vndb_api::models::vn::{VnFields, VnFilters, VnQuery};
+use vndb_api::models::vn::{VnFields, VnFilters, VnImageFields, VnSort};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = ReqwestVndbClient::default();
 
-    let query = VnQuery::new(
-        vec![VnFilters!(search).eq("ever17")],
-        VnFields!(title, image.url),
-    );
-
-    let response = client.vn(query).await?;
+    let response = client
+        .vn()
+        .filter(VnFilters!(search).eq("ever17"))
+        .fields([VnFields::Title, VnFields::Image(VnImageFields::Url)])
+        .sort(VnSort::Rating)
+        .results(10)
+        .send()
+        .await?;
 
     for vn in response.results {
         println!("{:?}", vn.title);
@@ -120,8 +122,7 @@ Use `MockVndbClient` in tests:
 use serde_json::json;
 use vndb_api::{
     client::{MockVndbClient, VndbClient, VndbEndpoint},
-    filter::VndbFilter,
-    models::vn::{VnFields, VnFilters, VnQuery},
+    models::vn::VnFields,
 };
 
 #[tokio::test]
@@ -138,12 +139,7 @@ async fn records_vn_request() {
         )
         .unwrap();
 
-    let query = VnQuery::new(
-        Vec::<VndbFilter<VnFilters>>::new(),
-        VnFields!(title),
-    );
-
-    let response = client.vn(query).await.unwrap();
+    let response = client.vn().field(VnFields::Title).send().await.unwrap();
     assert_eq!(response.results[0].title.as_deref(), Some("Ever17"));
 }
 ```
@@ -159,19 +155,62 @@ use vndb_api::models::character::CharacterQuery;
 ```
 
 `VndbQuery::new(filters, fields)` stores typed filters and field selectors.
-Sorts and request parameters are added fluently:
+The endpoint builders are the preferred way to create and send queries:
 
 ```rust
-use vndb_api::filter::VndbFilter;
+use vndb_api::client::{ReqwestVndbClient, VndbClient};
+use vndb_api::models::vn::{VnFields, VnFilters, VnImageFields, VnSort};
+
+let client = ReqwestVndbClient::default();
+
+let response = client
+    .vn()
+    .filter(VnFilters!(released).gte("2020-01-01"))
+    .fields([
+        VnFields::Title,
+        VnFields::Released,
+        VnFields::Image(VnImageFields::Url),
+        VnFields::Image(VnImageFields::Dims),
+    ])
+    .sort(VnSort::Rating)
+    .results(25)
+    .count()
+    .send()
+    .await?;
+```
+
+Repeated `.filter(...)` calls are wrapped into one `and` expression. Use
+`.or_filter(...)` or `.or_filters(...)` when the builder should wrap filters
+with `or` instead.
+
+Use `.build()` when you want the typed request body without sending it:
+
+```rust
+use vndb_api::client::{MockVndbClient, VndbClient};
+use vndb_api::models::vn::{VnFields, VnFilters, VnSort};
+
+let client = MockVndbClient::new();
+
+let query = client
+    .vn()
+    .filter(VnFilters!(released).gte("2020-01-01"))
+    .fields([VnFields::Title, VnFields::Released])
+    .sort(VnSort::Rating)
+    .results(25)
+    .count()
+    .build();
+```
+
+Manual `VndbQuery::new(...)` construction is still available for advanced code
+that wants to assemble request values directly:
+
+```rust
 use vndb_api::models::vn::{VnFields, VnFilters, VnQuery, VnSort};
 use vndb_api::query::QueryParams;
 
-let query = VnQuery::new(
-    vec![VnFilters!(released).gte("2020-01-01")],
-    VnFields!(title, released, image.{url, dims}),
-)
-.with_sort(VnSort::Rating)
-.with_params(QueryParams::new().with_results(25).with_count(true));
+let query = VnQuery::new([VnFilters!(released).gte("2020-01-01")], [VnFields::Title])
+    .with_sort(VnSort::Rating)
+    .with_params(QueryParams::new().with_results(25).with_count(true));
 ```
 
 ## Fields And Sorts
@@ -206,6 +245,17 @@ let fields = vec![
 
 let sort = VnSort::Rating;
 ```
+
+Field enums also expose associated constructors and field-set helpers:
+
+```rust
+let title = VnFields::title();
+let image_url = VnFields::image(VnImageFields::url());
+
+let safe_fields = VnFields::all();
+```
+
+`all()` walks non-recursive field paths and skips recursive cycles.
 
 ## Filters
 

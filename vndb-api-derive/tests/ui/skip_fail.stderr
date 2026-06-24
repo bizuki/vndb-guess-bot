@@ -15,3 +15,12 @@ error[E0599]: no variant or associated item named `Nested` found for enum `Neste
 ...
 28 |     let _ = StructFields::Nested(NestedFields::Nested(NestedNestedFields::Test));
    |                                                ^^^^^^ variant or associated item not found in `NestedFields`
+   |
+note: if you're trying to build a new `NestedFields` consider using one of the following associated functions:
+      NestedFields::field_a
+      NestedFields::field_b
+  --> tests/ui/skip_fail.rs:11:10
+   |
+11 | #[derive(VndbFieldsEnum)]
+   |          ^^^^^^^^^^^^^^
+   = note: this error originates in the derive macro `VndbFieldsEnum` (in Nightly builds, run with -Z macro-backtrace for more info)

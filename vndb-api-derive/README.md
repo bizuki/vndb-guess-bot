@@ -104,6 +104,18 @@ The macro normalizes grouped selectors into leaf paths, validates those paths
 against `VnFields`, and returns one typed enum value per leaf path. Old
 string-literal selector syntax is intentionally rejected.
 
+Field enums also expose associated constructors and complete-field helpers:
+
+```rust
+let title = VnFields::title();
+let image_url = VnFields::image(VnImageFields::url());
+
+let safe_fields = VnFields::all();
+```
+
+`all()` walks all non-recursive field paths and stops when it reaches a field
+enum that is already active in the current traversal.
+
 ## Filter selectors
 
 `VndbFiltersEnum` is derived on a filter enum that you define yourself. The

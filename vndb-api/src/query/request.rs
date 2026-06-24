@@ -17,7 +17,7 @@ impl VndbSelector for NoSort {
 
 #[derive(Debug, Clone)]
 pub struct VndbQuery<Filter, Field, Sort = NoSort> {
-    pub filters: Vec<VndbFilter<Filter>>,
+    pub filters: Option<VndbFilter<Filter>>,
     pub fields: Vec<Field>,
     pub sort: Option<Sort>,
     pub params: QueryParams,
@@ -29,7 +29,7 @@ impl<Filter, Field, Sort> VndbQuery<Filter, Field, Sort> {
         fields: impl IntoIterator<Item = Field>,
     ) -> Self {
         Self {
-            filters: filters.into_iter().collect(),
+            filters: combine_filters(filters, FilterCombination::And),
             fields: fields.into_iter().collect(),
             sort: None,
             params: QueryParams::default(),
@@ -61,7 +61,7 @@ where
         let sort = self.sort.as_ref().map(VndbSelector::selector);
         let mut map = serializer.serialize_map(Some(request_field_count(&self.params, &sort)))?;
 
-        map.serialize_entry("filters", &self.filters)?;
+        serialize_filters(&mut map, &self.filters)?;
         map.serialize_entry("fields", &fields)?;
 
         if let Some(sort) = &sort {
@@ -71,6 +71,32 @@ where
         serialize_params(&mut map, &self.params)?;
         map.end()
     }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum FilterCombination {
+    And,
+    Or,
+}
+
+pub(crate) fn combine_filters<Filter>(
+    filters: impl IntoIterator<Item = VndbFilter<Filter>>,
+    combination: FilterCombination,
+) -> Option<VndbFilter<Filter>> {
+    let mut filters = filters.into_iter();
+    let first = filters.next()?;
+    let second = match filters.next() {
+        Some(filter) => filter,
+        None => return Some(first),
+    };
+
+    let mut combined = vec![first, second];
+    combined.extend(filters);
+
+    Some(match combination {
+        FilterCombination::And => VndbFilter::and(combined),
+        FilterCombination::Or => VndbFilter::or(combined),
+    })
 }
 
 fn request_field_count(params: &QueryParams, sort: &Option<String>) -> usize {
@@ -95,6 +121,20 @@ where
     }
 
     Ok(())
+}
+
+fn serialize_filters<S, Filter>(
+    map: &mut S,
+    filters: &Option<VndbFilter<Filter>>,
+) -> Result<(), S::Error>
+where
+    S: SerializeMap,
+    VndbFilter<Filter>: Serialize,
+{
+    match filters {
+        Some(filters) => map.serialize_entry("filters", filters),
+        None => map.serialize_entry("filters", &[] as &[serde_json::Value]),
+    }
 }
 
 fn serialize_user<S>(map: &mut S, user: &UserId) -> Result<(), S::Error>

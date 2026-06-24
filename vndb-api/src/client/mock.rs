@@ -4,14 +4,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use thiserror::Error;
 
 use crate::{
-    client::{
-        endpoint::VndbEndpoint,
-        traits::{
-            CharacterQuery, CharacterResult, ProducerQuery, ProducerResult, QuoteQuery,
-            QuoteResult, ReleaseQuery, ReleaseResult, StaffQuery, StaffResult, TagQuery, TagResult,
-            TraitQuery, TraitResult, VnQuery, VnResult, VndbClient,
-        },
-    },
+    client::{endpoint::VndbEndpoint, traits::VndbClient},
     models::auth::AuthInfo,
     models::stats::VndbStats,
     models::user::{UserLookupQuery, UserLookupResponse},
@@ -142,20 +135,6 @@ impl MockVndbClient {
 
         Ok(response.response)
     }
-
-    async fn respond_query<Model, Filter, Field, Sort>(
-        &self,
-        endpoint: VndbEndpoint,
-        query: VndbQuery<Filter, Field, Sort>,
-    ) -> Result<VndbQueryResponse<Model>, MockVndbClientError>
-    where
-        Model: DeserializeOwned,
-        VndbQuery<Filter, Field, Sort>: Serialize,
-    {
-        let body = serde_json::to_value(&query)?;
-        self.respond_json(endpoint, endpoint.path().to_owned(), body)
-            .await
-    }
 }
 
 impl VndbClient for MockVndbClient {
@@ -207,36 +186,18 @@ impl VndbClient for MockVndbClient {
         .await
     }
 
-    async fn vn(&self, query: VnQuery) -> Result<VnResult, Self::Error> {
-        self.respond_query(VndbEndpoint::Vn, query).await
-    }
-
-    async fn release(&self, query: ReleaseQuery) -> Result<ReleaseResult, Self::Error> {
-        self.respond_query(VndbEndpoint::Release, query).await
-    }
-
-    async fn producer(&self, query: ProducerQuery) -> Result<ProducerResult, Self::Error> {
-        self.respond_query(VndbEndpoint::Producer, query).await
-    }
-
-    async fn character(&self, query: CharacterQuery) -> Result<CharacterResult, Self::Error> {
-        self.respond_query(VndbEndpoint::Character, query).await
-    }
-
-    async fn staff(&self, query: StaffQuery) -> Result<StaffResult, Self::Error> {
-        self.respond_query(VndbEndpoint::Staff, query).await
-    }
-
-    async fn tag(&self, query: TagQuery) -> Result<TagResult, Self::Error> {
-        self.respond_query(VndbEndpoint::Tag, query).await
-    }
-
-    async fn traits(&self, query: TraitQuery) -> Result<TraitResult, Self::Error> {
-        self.respond_query(VndbEndpoint::Trait, query).await
-    }
-
-    async fn quote(&self, query: QuoteQuery) -> Result<QuoteResult, Self::Error> {
-        self.respond_query(VndbEndpoint::Quote, query).await
+    async fn execute_query<Model, Filter, Field, Sort>(
+        &self,
+        endpoint: VndbEndpoint,
+        query: VndbQuery<Filter, Field, Sort>,
+    ) -> Result<VndbQueryResponse<Model>, Self::Error>
+    where
+        Model: DeserializeOwned,
+        VndbQuery<Filter, Field, Sort>: Serialize,
+    {
+        let body = serde_json::to_value(&query)?;
+        self.respond_json(endpoint, endpoint.path().to_owned(), body)
+            .await
     }
 }
 

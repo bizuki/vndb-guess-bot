@@ -1,5 +1,4 @@
 use serde_json::json;
-use vndb_api::filter::VndbFilter;
 use vndb_api::{
     client::{MockVndbClient, MockVndbClientError, VndbClient, VndbEndpoint},
     ids::{UserId, VnId},
@@ -20,7 +19,7 @@ fn query_serializes_typed_filters_fields_sort_and_params() {
     assert_eq!(
         serde_json::to_value(&query).unwrap(),
         json!({
-            "filters": [["id", "=", "v17"]],
+            "filters": ["id", "=", "v17"],
             "fields": "title",
             "sort": "rating",
             "reverse": false,
@@ -31,6 +30,93 @@ fn query_serializes_typed_filters_fields_sort_and_params() {
             "normalized_filters": false
         })
     );
+}
+
+#[test]
+fn query_builder_supports_sort_and_query_params() {
+    let client = MockVndbClient::new();
+    let id = VnId::try_from("v17").unwrap();
+    let query = client
+        .vn()
+        .filter(VnFilters!(id).eq(id))
+        .field(VnFields::Title)
+        .sort(VnSort::Rating)
+        .results(5)
+        .page(2)
+        .reverse()
+        .user(UserId::try_from("u3").unwrap())
+        .count()
+        .compact_filters()
+        .normalized_filters()
+        .build();
+
+    assert_eq!(
+        serde_json::to_value(&query).unwrap(),
+        json!({
+            "filters": ["id", "=", "v17"],
+            "fields": "title",
+            "sort": "rating",
+            "reverse": true,
+            "results": 5,
+            "page": 2,
+            "count": true,
+            "compact_filters": true,
+            "normalized_filters": true,
+            "user": "u3"
+        })
+    );
+}
+
+#[test]
+fn query_builder_wraps_repeated_filters_with_and_or() {
+    let client = MockVndbClient::new();
+    let and_query = client
+        .vn()
+        .filter(VnFilters!(search).eq("ever17"))
+        .filter(VnFilters!(released).gte("2000-01-01"))
+        .field(VnFields::Title)
+        .build();
+
+    assert_eq!(
+        serde_json::to_value(&and_query).unwrap()["filters"],
+        json!([
+            "and",
+            ["search", "=", "ever17"],
+            ["released", ">=", "2000-01-01"]
+        ])
+    );
+
+    let or_query = client
+        .vn()
+        .or_filters([
+            VnFilters!(search).eq("ever17"),
+            VnFilters!(search).eq("remember11"),
+        ])
+        .field(VnFields::Title)
+        .build();
+
+    assert_eq!(
+        serde_json::to_value(&or_query).unwrap()["filters"],
+        json!([
+            "or",
+            ["search", "=", "ever17"],
+            ["search", "=", "remember11"]
+        ])
+    );
+}
+
+#[test]
+fn real_recursive_field_all_helpers_do_not_loop() {
+    let fields = VnFields::all()
+        .iter()
+        .map(ToString::to_string)
+        .collect::<Vec<_>>();
+
+    assert!(fields.contains(&"title".to_owned()));
+    assert!(fields.contains(&"image{url}".to_owned()));
+    assert!(fields.contains(&"va{character{name}}".to_owned()));
+
+    assert!(!fields.iter().any(|field| field.contains("vns{va")));
 }
 
 #[tokio::test]
@@ -53,13 +139,7 @@ async fn mock_client_returns_queued_response_and_records_request() {
         )
         .unwrap();
 
-    let result = client
-        .vn(VndbQuery::new(
-            Vec::<VndbFilter<VnFilters>>::new(),
-            vec![VnFields::Title],
-        ))
-        .await
-        .unwrap();
+    let result = client.vn().field(VnFields::Title).send().await.unwrap();
 
     assert_eq!(result.results.len(), 1);
     assert_eq!(result.results[0].id.as_ref(), "v17");
@@ -88,13 +168,7 @@ async fn mock_client_rejects_endpoint_mismatches() {
         )
         .unwrap();
 
-    let error = client
-        .vn(VndbQuery::new(
-            Vec::<VndbFilter<VnFilters>>::new(),
-            vec![VnFields::Title],
-        ))
-        .await
-        .unwrap_err();
+    let error = client.vn().field(VnFields::Title).send().await.unwrap_err();
 
     assert!(matches!(
         error,

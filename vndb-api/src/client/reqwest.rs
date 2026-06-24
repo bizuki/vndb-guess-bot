@@ -2,14 +2,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use thiserror::Error;
 
 use crate::{
-    client::{
-        endpoint::VndbEndpoint,
-        traits::{
-            CharacterQuery, CharacterResult, ProducerQuery, ProducerResult, QuoteQuery,
-            QuoteResult, ReleaseQuery, ReleaseResult, StaffQuery, StaffResult, TagQuery, TagResult,
-            TraitQuery, TraitResult, VnQuery, VnResult, VndbClient,
-        },
-    },
+    client::{endpoint::VndbEndpoint, traits::VndbClient},
     models::auth::AuthInfo,
     models::stats::VndbStats,
     models::user::{UserLookupQuery, UserLookupResponse},
@@ -90,24 +83,6 @@ impl ReqwestVndbClient {
         Ok(response.json().await?)
     }
 
-    async fn post<Model, Filter, Field, Sort>(
-        &self,
-        endpoint: VndbEndpoint,
-        query: VndbQuery<Filter, Field, Sort>,
-    ) -> Result<VndbQueryResponse<Model>, ReqwestVndbClientError>
-    where
-        Model: DeserializeOwned,
-        VndbQuery<Filter, Field, Sort>: Serialize,
-    {
-        let body = serde_json::to_value(&query)?;
-        let url = format!("{}/{}", self.base_url, endpoint.path());
-        let request = self.authorized(self.client.post(url).json(&body));
-
-        let response = request.send().await?.error_for_status()?;
-
-        Ok(response.json().await?)
-    }
-
     fn endpoint_url(&self, endpoint: VndbEndpoint) -> String {
         self.url(endpoint.path())
     }
@@ -144,35 +119,21 @@ impl VndbClient for ReqwestVndbClient {
         self.get(VndbEndpoint::AuthInfo).await
     }
 
-    async fn vn(&self, query: VnQuery) -> Result<VnResult, Self::Error> {
-        self.post(VndbEndpoint::Vn, query).await
-    }
+    async fn execute_query<Model, Filter, Field, Sort>(
+        &self,
+        endpoint: VndbEndpoint,
+        query: VndbQuery<Filter, Field, Sort>,
+    ) -> Result<VndbQueryResponse<Model>, Self::Error>
+    where
+        Model: DeserializeOwned,
+        VndbQuery<Filter, Field, Sort>: Serialize,
+    {
+        let body = serde_json::to_value(&query)?;
+        let url = format!("{}/{}", self.base_url, endpoint.path());
+        let request = self.authorized(self.client.post(url).json(&body));
 
-    async fn release(&self, query: ReleaseQuery) -> Result<ReleaseResult, Self::Error> {
-        self.post(VndbEndpoint::Release, query).await
-    }
+        let response = request.send().await?.error_for_status()?;
 
-    async fn producer(&self, query: ProducerQuery) -> Result<ProducerResult, Self::Error> {
-        self.post(VndbEndpoint::Producer, query).await
-    }
-
-    async fn character(&self, query: CharacterQuery) -> Result<CharacterResult, Self::Error> {
-        self.post(VndbEndpoint::Character, query).await
-    }
-
-    async fn staff(&self, query: StaffQuery) -> Result<StaffResult, Self::Error> {
-        self.post(VndbEndpoint::Staff, query).await
-    }
-
-    async fn tag(&self, query: TagQuery) -> Result<TagResult, Self::Error> {
-        self.post(VndbEndpoint::Tag, query).await
-    }
-
-    async fn traits(&self, query: TraitQuery) -> Result<TraitResult, Self::Error> {
-        self.post(VndbEndpoint::Trait, query).await
-    }
-
-    async fn quote(&self, query: QuoteQuery) -> Result<QuoteResult, Self::Error> {
-        self.post(VndbEndpoint::Quote, query).await
+        Ok(response.json().await?)
     }
 }

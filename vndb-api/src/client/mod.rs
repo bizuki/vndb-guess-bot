@@ -1,3 +1,4 @@
+mod builder;
 mod endpoint;
 #[cfg(feature = "mock-client")]
 mod mock;
@@ -5,6 +6,7 @@ mod mock;
 mod reqwest;
 mod traits;
 
+pub use builder::EndpointQueryBuilder;
 pub use endpoint::VndbEndpoint;
 #[cfg(feature = "mock-client")]
 pub use mock::{MockVndbClient, MockVndbClientError, RecordedRequest};
