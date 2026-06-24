@@ -52,6 +52,11 @@ where
         self
     }
 
+    pub fn clear_fields(mut self) -> Self {
+        self.fields.clear();
+        self
+    }
+
     pub fn filter(mut self, filter: VndbFilter<Filter>) -> Self {
         self.filters = combine_existing_filter(self.filters, filter, FilterCombination::And);
         self
@@ -72,8 +77,18 @@ where
         self
     }
 
+    pub fn clear_filters(mut self) -> Self {
+        self.filters = None;
+        self
+    }
+
     pub fn sort(mut self, sort: Sort) -> Self {
         self.sort = Some(sort);
+        self
+    }
+
+    pub fn clear_sort(mut self) -> Self {
+        self.sort = None;
         self
     }
 
@@ -82,8 +97,18 @@ where
         self
     }
 
+    pub fn clear_params(mut self) -> Self {
+        self.params = QueryParams::default();
+        self
+    }
+
     pub fn reverse(mut self) -> Self {
         self.params.reverse = true;
+        self
+    }
+
+    pub fn clear_reverse(mut self) -> Self {
+        self.params.reverse = false;
         self
     }
 
@@ -92,8 +117,18 @@ where
         self
     }
 
+    pub fn clear_results(mut self) -> Self {
+        self.params.results = QueryParams::default().results;
+        self
+    }
+
     pub fn page(mut self, page: usize) -> Self {
         self.params.page = page;
+        self
+    }
+
+    pub fn clear_page(mut self) -> Self {
+        self.params.page = QueryParams::default().page;
         self
     }
 
@@ -102,8 +137,18 @@ where
         self
     }
 
+    pub fn clear_user(mut self) -> Self {
+        self.params.user = None;
+        self
+    }
+
     pub fn count(mut self) -> Self {
         self.params.count = true;
+        self
+    }
+
+    pub fn clear_count(mut self) -> Self {
+        self.params.count = false;
         self
     }
 
@@ -112,8 +157,26 @@ where
         self
     }
 
+    pub fn clear_compact_filters(mut self) -> Self {
+        self.params.compact_filters = false;
+        self
+    }
+
     pub fn normalized_filters(mut self) -> Self {
         self.params.normalized_filters = true;
+        self
+    }
+
+    pub fn clear_normalized_filters(mut self) -> Self {
+        self.params.normalized_filters = false;
+        self
+    }
+
+    pub fn clear(mut self) -> Self {
+        self.filters = None;
+        self.fields.clear();
+        self.sort = None;
+        self.params = QueryParams::default();
         self
     }
 

@@ -68,6 +68,111 @@ fn query_builder_supports_sort_and_query_params() {
 }
 
 #[test]
+fn query_builder_clears_internal_state() {
+    let client = MockVndbClient::new();
+    let query = client
+        .vn()
+        .filter(VnFilters!(search).eq("ever17"))
+        .field(VnFields::Title)
+        .sort(VnSort::Rating)
+        .params(
+            QueryParams::new()
+                .with_results(5)
+                .with_page(2)
+                .with_count(true),
+        )
+        .clear_filters()
+        .clear_fields()
+        .clear_sort()
+        .clear_params()
+        .build();
+
+    assert_eq!(
+        serde_json::to_value(&query).unwrap(),
+        json!({
+            "filters": [],
+            "fields": "",
+            "reverse": false,
+            "results": 10,
+            "page": 1,
+            "count": false,
+            "compact_filters": false,
+            "normalized_filters": false
+        })
+    );
+}
+
+#[test]
+fn query_builder_clears_individual_query_params() {
+    let client = MockVndbClient::new();
+    let query = client
+        .vn()
+        .field(VnFields::Title)
+        .reverse()
+        .results(5)
+        .page(2)
+        .user(UserId::try_from("u3").unwrap())
+        .count()
+        .compact_filters()
+        .normalized_filters()
+        .clear_reverse()
+        .clear_results()
+        .clear_page()
+        .clear_user()
+        .clear_count()
+        .clear_compact_filters()
+        .clear_normalized_filters()
+        .build();
+
+    assert_eq!(
+        serde_json::to_value(&query).unwrap(),
+        json!({
+            "filters": [],
+            "fields": "title",
+            "reverse": false,
+            "results": 10,
+            "page": 1,
+            "count": false,
+            "compact_filters": false,
+            "normalized_filters": false
+        })
+    );
+}
+
+#[test]
+fn query_builder_clear_resets_every_mutable_field() {
+    let client = MockVndbClient::new();
+    let query = client
+        .vn()
+        .filter(VnFilters!(search).eq("ever17"))
+        .field(VnFields::Title)
+        .sort(VnSort::Rating)
+        .reverse()
+        .results(5)
+        .page(2)
+        .user(UserId::try_from("u3").unwrap())
+        .count()
+        .compact_filters()
+        .normalized_filters()
+        .clear()
+        .build();
+
+    assert_eq!(
+        serde_json::to_value(&query).unwrap(),
+        json!({
+            "filters": [],
+            "fields": "",
+            "reverse": false,
+            "results": 10,
+            "page": 1,
+            "count": false,
+            "compact_filters": false,
+            "normalized_filters": false
+        })
+    );
+}
+
+#[test]
 fn query_builder_wraps_repeated_filters_with_and_or() {
     let client = MockVndbClient::new();
     let and_query = client
