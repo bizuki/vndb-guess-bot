@@ -1,30 +1,22 @@
 use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{
-    client::{EndpointQueryBuilder, VndbEndpoint},
+    client::VndbEndpoint,
     models::auth::AuthInfo,
-    models::character::{Character, CharacterFields, CharacterFilters, CharacterSort},
-    models::producer::{Producer, ProducerFields, ProducerFilters, ProducerSort},
-    models::quote::{Quote, QuoteFields, QuoteFilters, QuoteSort},
-    models::release::{Release, ReleaseFields, ReleaseFilters, ReleaseSort},
-    models::staff::{Staff, StaffFields, StaffFilters, StaffSort},
     models::stats::VndbStats,
-    models::tag::{Tag, TagFields, TagFilters, TagSort},
-    models::traits::{Trait, TraitFields, TraitFilters, TraitSort},
     models::user::{UserLookupQuery, UserLookupResponse},
-    models::vn::{Vn, VnFields, VnFilters, VnSort},
     query::{VndbQuery, VndbQueryResponse},
 };
 
 pub use crate::{
-    models::character::{CharacterQuery, CharacterResult},
-    models::producer::{ProducerQuery, ProducerResult},
-    models::quote::{QuoteQuery, QuoteResult},
-    models::release::{ReleaseQuery, ReleaseResult},
-    models::staff::{StaffQuery, StaffResult},
-    models::tag::{TagQuery, TagResult},
-    models::traits::{TraitQuery, TraitResult},
-    models::vn::{VnQuery, VnResult},
+    models::character::{CharacterQuery, CharacterQueryBuilder, CharacterResult},
+    models::producer::{ProducerQuery, ProducerQueryBuilder, ProducerResult},
+    models::quote::{QuoteQuery, QuoteQueryBuilder, QuoteResult},
+    models::release::{ReleaseQuery, ReleaseQueryBuilder, ReleaseResult},
+    models::staff::{StaffQuery, StaffQueryBuilder, StaffResult},
+    models::tag::{TagQuery, TagQueryBuilder, TagResult},
+    models::traits::{TraitQuery, TraitQueryBuilder, TraitResult},
+    models::vn::{VnQuery, VnQueryBuilder, VnResult},
 };
 
 #[allow(async_fn_in_trait)]
@@ -48,65 +40,59 @@ pub trait VndbClient {
         Model: DeserializeOwned,
         VndbQuery<Filter, Field, Sort>: Serialize;
 
-    fn vn(&self) -> EndpointQueryBuilder<'_, Self, Vn, VnFilters, VnFields, VnSort>
+    fn vn(&self) -> VnQueryBuilder<'_, Self>
     where
         Self: Sized,
     {
-        EndpointQueryBuilder::new(self, VndbEndpoint::Vn)
+        VnQueryBuilder::new(self, VndbEndpoint::Vn)
     }
 
-    fn release(
-        &self,
-    ) -> EndpointQueryBuilder<'_, Self, Release, ReleaseFilters, ReleaseFields, ReleaseSort>
+    fn release(&self) -> ReleaseQueryBuilder<'_, Self>
     where
         Self: Sized,
     {
-        EndpointQueryBuilder::new(self, VndbEndpoint::Release)
+        ReleaseQueryBuilder::new(self, VndbEndpoint::Release)
     }
 
-    fn producer(
-        &self,
-    ) -> EndpointQueryBuilder<'_, Self, Producer, ProducerFilters, ProducerFields, ProducerSort>
+    fn producer(&self) -> ProducerQueryBuilder<'_, Self>
     where
         Self: Sized,
     {
-        EndpointQueryBuilder::new(self, VndbEndpoint::Producer)
+        ProducerQueryBuilder::new(self, VndbEndpoint::Producer)
     }
 
-    fn character(
-        &self,
-    ) -> EndpointQueryBuilder<'_, Self, Character, CharacterFilters, CharacterFields, CharacterSort>
+    fn character(&self) -> CharacterQueryBuilder<'_, Self>
     where
         Self: Sized,
     {
-        EndpointQueryBuilder::new(self, VndbEndpoint::Character)
+        CharacterQueryBuilder::new(self, VndbEndpoint::Character)
     }
 
-    fn staff(&self) -> EndpointQueryBuilder<'_, Self, Staff, StaffFilters, StaffFields, StaffSort>
+    fn staff(&self) -> StaffQueryBuilder<'_, Self>
     where
         Self: Sized,
     {
-        EndpointQueryBuilder::new(self, VndbEndpoint::Staff)
+        StaffQueryBuilder::new(self, VndbEndpoint::Staff)
     }
 
-    fn tag(&self) -> EndpointQueryBuilder<'_, Self, Tag, TagFilters, TagFields, TagSort>
+    fn tag(&self) -> TagQueryBuilder<'_, Self>
     where
         Self: Sized,
     {
-        EndpointQueryBuilder::new(self, VndbEndpoint::Tag)
+        TagQueryBuilder::new(self, VndbEndpoint::Tag)
     }
 
-    fn traits(&self) -> EndpointQueryBuilder<'_, Self, Trait, TraitFilters, TraitFields, TraitSort>
+    fn traits(&self) -> TraitQueryBuilder<'_, Self>
     where
         Self: Sized,
     {
-        EndpointQueryBuilder::new(self, VndbEndpoint::Trait)
+        TraitQueryBuilder::new(self, VndbEndpoint::Trait)
     }
 
-    fn quote(&self) -> EndpointQueryBuilder<'_, Self, Quote, QuoteFilters, QuoteFields, QuoteSort>
+    fn quote(&self) -> QuoteQueryBuilder<'_, Self>
     where
         Self: Sized,
     {
-        EndpointQueryBuilder::new(self, VndbEndpoint::Quote)
+        QuoteQueryBuilder::new(self, VndbEndpoint::Quote)
     }
 }

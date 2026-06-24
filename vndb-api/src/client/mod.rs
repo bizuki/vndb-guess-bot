@@ -13,7 +13,9 @@ pub use mock::{MockVndbClient, MockVndbClientError, RecordedRequest};
 #[cfg(feature = "reqwest-client")]
 pub use reqwest::{ReqwestVndbClient, ReqwestVndbClientError, DEFAULT_BASE_URL};
 pub use traits::{
-    CharacterQuery, CharacterResult, ProducerQuery, ProducerResult, QuoteQuery, QuoteResult,
-    ReleaseQuery, ReleaseResult, StaffQuery, StaffResult, TagQuery, TagResult, TraitQuery,
-    TraitResult, VnQuery, VnResult, VndbClient,
+    CharacterQuery, CharacterQueryBuilder, CharacterResult, ProducerQuery, ProducerQueryBuilder,
+    ProducerResult, QuoteQuery, QuoteQueryBuilder, QuoteResult, ReleaseQuery, ReleaseQueryBuilder,
+    ReleaseResult, StaffQuery, StaffQueryBuilder, StaffResult, TagQuery, TagQueryBuilder,
+    TagResult, TraitQuery, TraitQueryBuilder, TraitResult, VnQuery, VnQueryBuilder, VnResult,
+    VndbClient,
 };

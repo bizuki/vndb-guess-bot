@@ -5,7 +5,8 @@
 It provides:
 
 - typed VNDB response models;
-- endpoint query aliases such as `VnQuery`, `ReleaseQuery`, and `CharacterQuery`;
+- endpoint query and builder aliases such as `VnQuery`, `VnQueryBuilder`,
+  `ReleaseQuery`, and `CharacterQueryBuilder`;
 - typed field and sort selectors;
 - typed filter descriptors that only accept compatible Rust values and operators;
 - a transport-independent `VndbClient` trait;
@@ -146,10 +147,10 @@ async fn records_vn_request() {
 
 ## Queries
 
-Each endpoint module exports a query alias:
+Each endpoint module exports query and builder aliases:
 
 ```rust
-use vndb_api::models::vn::VnQuery;
+use vndb_api::models::vn::{VnQuery, VnQueryBuilder};
 use vndb_api::models::release::ReleaseQuery;
 use vndb_api::models::character::CharacterQuery;
 ```
